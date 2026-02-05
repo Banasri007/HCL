@@ -26,7 +26,8 @@ app = FastAPI(
 )
 
 # API Key configuration
-API_KEY = "your-secure-api-key-here"  # Change this in production
+import os
+API_KEY = os.getenv("API_KEY", "168ef25828540dda5abd5f957c32dc3d")  # Reads from environment variable
 api_key_header = APIKeyHeader(name="X-API-Key")
 
 # Supported languages
@@ -207,6 +208,22 @@ async def analyze_voice(
     except Exception as e:
         logger.error(f"Error analyzing voice: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error processing audio: {str(e)}")
+
+@app.get("/")
+async def root():
+    """Root endpoint - API welcome"""
+    return {
+        "message": "Voice Deepfake Detection API",
+        "version": "1.0.0",
+        "status": "online",
+        "endpoints": {
+            "health": "/api/v1/health",
+            "info": "/api/v1/info",
+            "analyze": "POST /api/v1/analyze",
+            "docs": "/docs"
+        },
+        "supported_languages": SUPPORTED_LANGUAGES
+    }
 
 @app.get("/api/v1/health")
 async def health_check():
